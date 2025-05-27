@@ -1,8 +1,6 @@
 spring:
   application:
     name: discovery-server
-  cloud:
-    config:
-      import:
-        uri: http://config-server:8888/
-        name: discovery-server
+  config:
+    import:
+      uri: optional:configserver:http://localhost:8888/
