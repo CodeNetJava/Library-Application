@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: discovery-server
+  cloud:
+    config:
+      import:
+        uri: http://config-server:8888/
+        name: discovery-server
