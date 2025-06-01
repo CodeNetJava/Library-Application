@@ -1,0 +1,12 @@
+server:
+  post: 8082
+
+cloud:
+  gateway:
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true
+
+
+    

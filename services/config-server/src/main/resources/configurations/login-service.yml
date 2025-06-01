@@ -1,0 +1,6 @@
+server:
+  port: 8083
+keycloak:
+  client-id: "gateway-service"
+  client-secret: "pLQOex7XzfEYQKfotet5VHjUsJ1GwKQt"
+  token-uri: "http://localhost:8180/realms/library-realm/protocol/openid-connect/token"
