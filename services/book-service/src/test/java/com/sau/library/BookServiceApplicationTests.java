@@ -1,4 +1,4 @@
-package com.sau.book_service;
+package com.sau.library;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

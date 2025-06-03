@@ -45,7 +45,7 @@ public class LoginService {
         body.add("client_secret",clientSecret);
         body.add("client_id",clientId);
 
-        HttpEntity httpEntity = new HttpEntity(headers,body);
+        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity(body,headers);
 
         ResponseEntity<TokenResponse> responseEntity = restTemplate.postForEntity(
                 tokenUri,
