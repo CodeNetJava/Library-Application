@@ -10,10 +10,11 @@ services:
       POSTGRES_PASSWORD: test
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - backend-services
 
-  # PGAdmin UI for postgress
+  # PGAdmin UI for postgres
   pgadmin:
     image: dpage/pgadmin4
     container_name: ms_pgadmin_ui
@@ -43,7 +44,7 @@ services:
     networks:
       - backend-services
 
-# mongo-express UI for mongodb
+  # mongo-express UI for mongodb
   mongo-express:
     image: mongo-express
     container_name: mongo_express_ui
@@ -58,6 +59,7 @@ services:
     restart: always
     depends_on:
       - mongodb
+
   # Keycloak Server (using shared PostgreSQL)
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
@@ -70,6 +72,8 @@ services:
       KC_DB_URL: jdbc:postgresql://postgresql:5432/keycloakdb
       KC_DB_USERNAME: test
       KC_DB_PASSWORD: test
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
     ports:
       - "8180:8080"
     depends_on:
