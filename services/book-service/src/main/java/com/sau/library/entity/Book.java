@@ -1,13 +1,19 @@
 package com.sau.library.entity;
 
 import jakarta.persistence.Entity;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Data
 @Entity
 public class Book {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
     private String bookName;
     private String author;

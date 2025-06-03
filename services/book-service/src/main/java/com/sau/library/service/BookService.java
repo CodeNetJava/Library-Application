@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 public class BookService {
 
     // add the book/ use the put method
-    //check if book present the only increment quntity
+    //check if book present the only increment quantity
     // if not start from quntity as 1
     private final BookRepository bookRepository;
     public String addBook(BookRequest bookRequest) {
         String isbn = bookRequest.isbn() != null && !bookRequest.isbn().isEmpty()
                 ? bookRequest.isbn() : this.generateIsbn(bookRequest);
-        Book book = bookRepository.findByisbn(bookRequest.isbn());
+        Book book = bookRepository.findByisbn(isbn);
 
         if(book != null)
         {
