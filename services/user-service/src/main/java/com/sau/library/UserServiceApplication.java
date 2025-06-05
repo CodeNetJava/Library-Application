@@ -1,4 +1,4 @@
-package com.sau.user_service;
+package com.sau.library;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

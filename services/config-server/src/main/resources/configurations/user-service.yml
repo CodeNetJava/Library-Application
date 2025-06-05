@@ -1,0 +1,7 @@
+server:
+  port: 9091
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://test:test@mongodb:27017/userdb?authSource:admin

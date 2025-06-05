@@ -1,10 +1,10 @@
-package com.sau.user_service;
+package com.sau.library;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserServiceApplicationTests {
+class BookServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
