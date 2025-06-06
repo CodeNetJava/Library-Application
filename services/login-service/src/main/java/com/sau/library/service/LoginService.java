@@ -1,5 +1,7 @@
 package com.sau.library.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sau.library.dto.RegisterRequest;
 import com.sau.library.dto.TokenResponse;
 import com.sau.library.dto.UserCredentials;
@@ -15,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,13 +53,13 @@ public class LoginService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type","password");
-        body.add("username","savita");
-        body.add("password","test");
-        body.add("client_secret",clientSecret);
-        body.add("client_id",clientId);
+        body.add("grant_type", "password");
+        body.add("username", "savita");
+        body.add("password", "test");
+        body.add("client_secret", clientSecret);
+        body.add("client_id", clientId);
 
-        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity(body,headers);
+        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity(body, headers);
 
         ResponseEntity<TokenResponse> responseEntity = restTemplate.postForEntity(
                 tokenUri,
@@ -68,51 +71,66 @@ public class LoginService {
     }
 
     public void registerUser(RegisterRequest registerRequest) {
-        //Get Admin Access Token from Keycloak //we need this to register
-        String token =  this.getAdminToken();
+        // 1. Get admin token
+        String token = this.getAdminToken();
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        httpHeaders.setBearerAuth(token);
+        // 2. Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON); //
 
-        Map<String,Object> body = new HashMap<>();
-        body.put("username", registerRequest.getUsername());
-        body.put("email", registerRequest.getEmail());
-        body.put("enabled", true);
-        body.put("credentials", List.of(Map.of(
-                "type", "password",
-                "value", registerRequest.getPassword(),
-                "temporary", false
-        )));
+        // 3. Build user payload
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", registerRequest.getUsername());
+        user.put("email", registerRequest.getEmail());
+        user.put("enabled", true);
+        user.put("firstName", registerRequest.getFirstName());
+        user.put("lastName", registerRequest.getLastName());
 
-        HttpEntity<Map<String,Object>> httpEntity = new HttpEntity<>(body,httpHeaders);
+        // Password credentials
+        List<Map<String, Object>> credentials = new ArrayList<>();
+        Map<String, Object> passwordMap = new HashMap<>();
+        passwordMap.put("type", "password");
+        passwordMap.put("value", registerRequest.getPassword());
+        passwordMap.put("temporary", false);
+        credentials.add(passwordMap);
 
-        restTemplate.postForEntity(registerUserUri,
-                httpEntity,
-                String.class
-                );
+        user.put("credentials", credentials);
+
+        // 4. Send request
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(user, headers);
+
+        restTemplate.postForEntity(registerUserUri, httpEntity, String.class);
     }
+
+
 
     private String getAdminToken() {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Map<String,String> body = new HashMap<>();
-        body.put("grant_type","password");
-        body.put("client_id",clientId);
-        body.put("username","admin");
-        body.put("password","admin");
+        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type","password");
+        body.add("client_id",clientId);
+        body.add("username","admin");
+        body.add("password","admin");
+        body.add("client_secret",clientSecret);
 
-        HttpEntity<Map<String,String>> httpEntity = new HttpEntity<>(body, httpHeaders);
+        HttpEntity<MultiValueMap<String,String>> httpEntity = new HttpEntity<>(body, httpHeaders);
 
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(adminTokenUri,
         httpEntity,
                 String.class
         );
 
-        return responseEntity.getBody();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(responseEntity.getBody());
+            return jsonNode.get("access_token").asText();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to extract token", e);
+        }
 
     }
-
 }

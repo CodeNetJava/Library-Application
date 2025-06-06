@@ -4,5 +4,5 @@ keycloak:
   client-id: "gateway-service"
   client-secret: "pLQOex7XzfEYQKfotet5VHjUsJ1GwKQt"
   token-uri: "http://localhost:8180/realms/library-realm/protocol/openid-connect/token"
-  admin-token-uri: "http://localhost:8180/realms/master/protocol/openid-connect/token"
+  admin-token-uri: "http://localhost:8180/realms/library-realm/protocol/openid-connect/token"
   register-user-uri: "http://localhost:8180/admin/realms/library-realm/users"
