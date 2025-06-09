@@ -1,5 +1,7 @@
 package com.sau.library.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sau.library.dto.RegisterRequest;
@@ -7,10 +9,7 @@ import com.sau.library.dto.TokenResponse;
 import com.sau.library.dto.UserCredentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,8 +39,12 @@ public class LoginService {
     @Value("${keycloak.register-user-uri}")
     private String registerUserUri;
 
-    private final RestTemplate restTemplate;
+    @Value("${keycloak.base-url}")
+    private String baseUrl;
 
+    @Value("${keycloak.realm}")
+    private String realm;
+    private final RestTemplate restTemplate;
     public LoginService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
@@ -101,26 +104,95 @@ public class LoginService {
         HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(user, headers);
 
         restTemplate.postForEntity(registerUserUri, httpEntity, String.class);
+        this.setRole(registerRequest);
+
     }
 
 
+    private void setRole(RegisterRequest registerRequest) {
+        // 1. Get admin token
+        String token = this.getAdminToken();
+
+        // 2. Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON); //
+
+        HttpEntity httpEntity = new HttpEntity<>(headers);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+
+            // get the userID
+            String getUserIdUri = registerUserUri + "?username=" + registerRequest.getUsername();
+
+            ResponseEntity<String> responseEntity1 =
+                    restTemplate.exchange(
+                            getUserIdUri,
+                            HttpMethod.GET,
+                            httpEntity,
+                            String.class);
+
+            JsonNode jsonNode = objectMapper.readTree(responseEntity1.getBody());
+            String userId = jsonNode.get(0).get("id").asText();
+
+            // get the client (gateway-service) UUID
+            String getClientUUIDurl = baseUrl + "/admin/realms/" + realm + "/clients" + "?clientId=" + clientId;
+
+            ResponseEntity<String> responseEntity2 =
+                    restTemplate.exchange(
+                            getClientUUIDurl,
+                            HttpMethod.GET,
+                            httpEntity,
+                            String.class
+                    );
+
+            String clientUUID = objectMapper.readTree(responseEntity2.getBody()).get(0).get("id").asText();
+
+            // get the role
+            String roleName = "consumer";
+            String roleUri = baseUrl + "/admin/realms/" + realm + "/clients/" + clientUUID + "/roles/" + roleName;
+            ResponseEntity<String> responseEntity3 =
+                    restTemplate.exchange(
+                            roleUri,
+                            HttpMethod.GET,
+                            httpEntity,
+                            String.class
+                    );
+            JsonNode roleNode = objectMapper.readTree(responseEntity3.getBody());
+
+            // set the role
+            String assignRoleUri = baseUrl + "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/clients/" + clientUUID;
+            HttpEntity<String> httpEntity1 = new HttpEntity<>("[" + roleNode.toString() + "]", headers);
+            restTemplate.postForEntity(
+                    assignRoleUri,
+                    httpEntity1,
+                    String.class
+            );
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("failed to register the user",e);
+        }
+
+    }
 
     private String getAdminToken() {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String,String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type","password");
-        body.add("client_id",clientId);
-        body.add("username","admin");
-        body.add("password","admin");
-        body.add("client_secret",clientSecret);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "password");
+        body.add("client_id", clientId);
+        body.add("username", "savita");
+        body.add("password", "test");
+        body.add("client_secret", clientSecret);
 
-        HttpEntity<MultiValueMap<String,String>> httpEntity = new HttpEntity<>(body, httpHeaders);
+        HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(body, httpHeaders);
 
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(adminTokenUri,
-        httpEntity,
+                httpEntity,
                 String.class
         );
 
