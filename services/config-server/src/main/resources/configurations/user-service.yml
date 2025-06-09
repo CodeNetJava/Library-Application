@@ -4,4 +4,4 @@ server:
 spring:
   data:
     mongodb:
-      uri: mongodb://test:test@mongodb:27017/userdb?authSource:admin
+      uri: mongodb://test:test@mongodb:27017/userdb?authSource=admin
