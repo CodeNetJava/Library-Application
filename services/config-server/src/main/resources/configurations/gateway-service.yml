@@ -1,12 +1,26 @@
 server:
   port: 8082
 
-cloud:
-  gateway:
-    discovery:
-      locator:
-        enabled: true
-        lower-case-service-id: true
+# Spring Security OAuth2 Resource Server
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Point this to the Keycloak realm's issuer URI
+          issuer-uri: http://localhost:8180/realms/library-realm
 
+  # Spring Cloud Gateway configuration
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # Enable discovering services from the discovery server
+          enabled: true
+          # This will create routes using lower case service IDs
+          # e.g., USER-SERVICE will be available at "/user-service"
+          lower-case-service-id: true
 
-    
+  # Register gateway itself, useful for monitoring and other purposes
+  instance:
+    prefer-ip-address: true

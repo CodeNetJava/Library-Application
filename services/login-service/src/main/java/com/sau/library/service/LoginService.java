@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sau.library.dto.RegisterRequest;
 import com.sau.library.dto.TokenResponse;
 import com.sau.library.dto.UserCredentials;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -21,9 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@Slf4j
 @Service
 public class LoginService {
+
 
     @Value("${keycloak.client-id}")
     private String clientId;
@@ -45,6 +48,7 @@ public class LoginService {
     @Value("${keycloak.realm}")
     private String realm;
     private final RestTemplate restTemplate;
+
     public LoginService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
@@ -73,7 +77,7 @@ public class LoginService {
         return responseEntity.getBody();
     }
 
-    public void registerUser(RegisterRequest registerRequest) {
+    public void registerUser(RegisterRequest registerRequest, String roleName) {
         // 1. Get admin token
         String token = this.getAdminToken();
 
@@ -102,14 +106,17 @@ public class LoginService {
 
         // 4. Send request
         HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(user, headers);
-
-        restTemplate.postForEntity(registerUserUri, httpEntity, String.class);
-        this.setRole(registerRequest);
+        try {
+            restTemplate.postForEntity(registerUserUri, httpEntity, String.class);
+        } catch (RuntimeException e) {
+            log.error("Error ocurred : "+e);
+        }
+        this.setRole(registerRequest,roleName);
 
     }
 
 
-    private void setRole(RegisterRequest registerRequest) {
+    private void setRole(RegisterRequest registerRequest, String roleName) {
         // 1. Get admin token
         String token = this.getAdminToken();
 
@@ -151,7 +158,7 @@ public class LoginService {
             String clientUUID = objectMapper.readTree(responseEntity2.getBody()).get(0).get("id").asText();
 
             // get the role
-            String roleName = "consumer";
+            //String roleName = "consumer";
             String roleUri = baseUrl + "/admin/realms/" + realm + "/clients/" + clientUUID + "/roles/" + roleName;
             ResponseEntity<String> responseEntity3 =
                     restTemplate.exchange(
@@ -172,7 +179,7 @@ public class LoginService {
             );
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("failed to register the user",e);
+            throw new RuntimeException("failed to register the user", e);
         }
 
     }
