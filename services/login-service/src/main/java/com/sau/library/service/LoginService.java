@@ -61,8 +61,8 @@ public class LoginService {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "password");
-        body.add("username", "savita");
-        body.add("password", "test");
+        body.add("username", userCredentials.getUsername());
+        body.add("password", userCredentials.getPassword());
         body.add("client_secret", clientSecret);
         body.add("client_id", clientId);
 

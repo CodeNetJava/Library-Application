@@ -9,10 +9,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @Getter
 @Setter
+
 public class User {
-    private int id;
+    private String id;
+    private String username;
+    private String userRollNo;
     private String userFirstname;
     private String userlastName;
     private String email;
     private String role;
+    private Address address;
 }

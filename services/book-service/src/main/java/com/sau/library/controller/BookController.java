@@ -18,8 +18,8 @@ public class BookController {
     private final BookService bookService;
 
    @PutMapping("/addBook")
-    public ResponseEntity<String> addBook(@RequestBody BookRequest bookRequest){
-       return ResponseEntity.ok(bookService.addBook(bookRequest));
+    public ResponseEntity<String> addBook(@RequestBody BookRequest bookRequest,@RequestHeader("X-Username") String usernmae ){
+       return ResponseEntity.ok(bookService.addBook(bookRequest,usernmae));
     }
     // get book
 

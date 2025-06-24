@@ -17,11 +17,12 @@ public class KeyCloakRoleConverter implements Converter<Jwt, Collection<GrantedA
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
-        Map<String,Object> realmAccess = (Map<String, Object>) jwt.getClaims().get("realm_access");
-        if(realmAccess == null || realmAccess.isEmpty()){
+        Map<String,Object> resourceAccess = (Map<String, Object>) jwt.getClaims().get("resource_access");
+        if(resourceAccess == null || resourceAccess.isEmpty()){
             return List.of();
         }
-       Collection<String> roles = (Collection<String>) realmAccess.get("roles");
+        Map<String,Object> gatewayservice = (Map<String, Object>) resourceAccess.get("gateway-service");
+       Collection<String> roles = (Collection<String>) gatewayservice.get("roles");
 
         return roles.stream()
                 .map( e -> "ROLE_"+e)

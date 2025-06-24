@@ -21,7 +21,7 @@ public class BookService {
     private final BookRepository bookRepository;
 
     // add book
-    public String addBook(BookRequest bookRequest) {
+    public String addBook(BookRequest bookRequest, String username) {
         String isbn = bookRequest.isbn() != null && !bookRequest.isbn().isEmpty()
                 ? bookRequest.isbn() : this.generateIsbn(bookRequest);
         Book book = bookRepository.findByisbn(isbn);
@@ -30,13 +30,13 @@ public class BookService {
             book.setTotalCopies(book.getTotalCopies() + bookRequest.copiesCount());
             book.setAvailableCopies(book.getAvailableCopies() + bookRequest.copiesCount());
             bookRepository.save(book);
-            return "book is already available updated the stock";
+            return "book is already available updated the stock by "+username;
         } else {
 
             book = Mapper.toBook(bookRequest);
             book.setIsbn(isbn);
             bookRepository.save(book);
-            return "book is added in the library";
+            return "book is added in the library by the "+username;
         }
     }
 

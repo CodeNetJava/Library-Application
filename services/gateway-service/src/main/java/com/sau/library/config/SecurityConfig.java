@@ -28,7 +28,7 @@ public class SecurityConfig {
                         .permitAll()
                         .pathMatchers("/login-service/library/register/admin").authenticated()
                         // need admin role only
-                        .pathMatchers("/login-service/library/admin/**").hasRole("ADMIN")
+                        .pathMatchers("/login-service/library/admin/**","/book-service/book/addBook/**").hasRole("admin")
                         // anyrequest to book /order / user service need role consumer or admin
                         .pathMatchers("/user-service/library/user/**","/book-service/library/book/**","/order-service/library/order/**")
                         .hasAnyRole("CONSUMER","ADMIN")
