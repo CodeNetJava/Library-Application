@@ -10,9 +10,10 @@
         <module name="login-service" />
         <module name="config-server" />
         <module name="discovery-server" />
-        <module name="user-service" />
+        <module name="payment-service" />
         <module name="book-service" />
         <module name="gateway-service" />
+        <module name="user-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -23,6 +24,7 @@
       <module name="discovery-server" options="-parameters" />
       <module name="gateway-service" options="-parameters" />
       <module name="login-service" options="-parameters" />
+      <module name="payment-service" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>
   </component>

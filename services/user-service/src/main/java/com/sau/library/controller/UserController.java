@@ -1,14 +1,12 @@
 package com.sau.library.controller;
 
 import com.sau.library.dto.UserProfileRequest;
-import com.sau.library.entity.User;
 import com.sau.library.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {

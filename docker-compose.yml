@@ -79,6 +79,22 @@ services:
       - postgresql
     networks:
       - backend-services
+# for payment-service
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_DATABASE: payment
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend-services
 
 networks:
   backend-services:
@@ -88,3 +104,4 @@ volumes:
   pgdata:
   mongodata:
   pgadmin:
+  mysql_data:
