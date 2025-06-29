@@ -1,9 +1,9 @@
 server:
-  port: 8087
+  port: 8085
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/book_db
+    url: jdbc:postgresql://localhost:5432/order_db
     username: test
     password: test
   jpa:
